@@ -1,0 +1,35 @@
+import BlogPost from '../../../components/BlogPost'
+export const meta = {
+  title: 'Object Description',
+  description: 'Using a component to render cool stuff',
+  date: 'Aug 10, 2020',
+  readTime: 4
+}
+export default ({ children }) => <BlogPost meta={meta}>{children}</BlogPost>;
+
+
+# Simple OpenAPI Usage
+The diagram below shows the simplest way to start using Saxo's OpenAPI.
+
+
+## Field Groups
+<OD description={description} code={code}/>
+
+## Finding the first available sample
+The ChartInfo group includes a <code>FirstSampleTime</code> field. This provides the time of the very first sample. Having this information is often useful if you want to show a chart with a horizontal slider at the bottom, and you want to give that slider the correct approximate length even if you do not want to initially fetch all of the chart samples.
+
+## Typical usage - Request/Response
+The most common usage of the chart endpoint in a request/response mode is as follows:
+
+First make a simple get request specifying <code>AssetType</code>, Uic, Horizon and all field groups. This will return:
+ChartInfo holds various convenience information which applies for all samples on the specified instrument/horizon
+DisplayAndFormat holds information about how to format the prices in the samples.
+Data includes the most recent 100 samples up to current time.
+A DataVersion (see later)
+Then, at regular intervals make requests specifying AssetType, Uic, Horizon and:
+Mode=From
+Time= the value of the most recent sample, which you have in your Data array.
+The Data array will now include "all" samples which exist from or after the specified time. Often this will just be a single sample.
+
+# New title
+something

@@ -1,0 +1,34 @@
+
+.Main {
+  border-radius: 10px;
+  background-color: #fff;
+  padding-left: 10px;
+  display: flex
+}
+
+.Left {
+  width: 40%;
+}
+
+.Right {
+  width: 50%;
+}
+
+.CodeBlock {
+  background-color: #f7f7f7;
+  border-radius: 5px;
+  border: 1px solid;
+}
+
+.Code {
+  background-color: #e7e7e7;
+  white-space: pre-wrap;
+  padding-left: 15px;
+}
+
+.CodeSelected {
+  background-color: #f7f7f7 ;
+  white-space: pre-wrap;
+  padding-left: 10px;
+}
+

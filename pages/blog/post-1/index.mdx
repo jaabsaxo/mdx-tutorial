@@ -1,0 +1,36 @@
+import BlogPost from '../../../components/BlogPost'
+import MakeRequest from '../../../components/MakeRequest'
+
+export const meta = {
+  title: 'Placing Orders 101',
+  description: 'How to place orders with OpenAPI. Covers market orders, limit orders etc.',
+  date: 'April 1, 2022',
+  readTime: 2 
+}
+
+export function RenderRequest(props) {
+
+}
+
+## Place an order 
+When placing orders you create a post to endpoint: 
+
+``` 
+POST https://gateway.saxobank.com/sim/openapi/trade/v2/orders
+
+{
+	"Uic": 16,
+	"BuySell": "Buy",
+	"AssetType": "FxSpot",
+	"Amount": 100000,
+	"OrderPrice": 7,
+	"OrderType": "Limit",
+	"OrderRelation": "StandAlone",
+	"ManualOrder": true,
+	"OrderDuration": {
+		"DurationType": "GoodTillCancel"
+	}
+}
+```
+
+ <MakeRequest url="https://gateway.saxobank.com/sim/openapi/trade/v2/orders" method="post"/>

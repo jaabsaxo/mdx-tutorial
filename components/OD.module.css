@@ -1,0 +1,51 @@
+
+.Main {
+  border-radius: 10px;
+  background-color: #fff;
+  padding-left: 1px;
+  display: flex
+}
+
+.Left {
+  width: 50%;
+}
+
+.Right {
+  width: 50%;
+}
+
+.CodeBlock {
+  background-color: #f7f7f7;
+  border-radius: 5px;
+  border: 1px solid;
+  font-family: "Source-code-Pro" , monospace;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.CodeFocus {
+  background-color: #f7f7f7;
+  white-space: pre-wrap;
+  padding-left: 10px;
+  color: #474747;
+  transition: background-color 0.5s;
+}
+
+.LineFocus {
+  color: #a7a7a7;
+}
+
+.CodeHidden {
+  background-color: #e7e7e7 ;
+  white-space: pre-wrap;
+  padding-left: 10px;
+  color: #a7a7a7;
+  transition: background-color 0.5s;
+}
+
+.LineHidden {
+  color: #a7a7a7;
+}
+
+
+
