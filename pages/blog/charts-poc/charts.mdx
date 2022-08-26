@@ -1,0 +1,142 @@
+import InfoBlock from '../../../components/InfoBlock'
+
+# Charts
+The chart service group's chart resource provides access to historical chart samples.
+We provide chart samples for a set number of horizons from 1 minute to 1 month.
+The amount of samples varies by instrument and asset class with some Forex data dating back as along as 2002.
+
+## Data Returned
+The chart response may include a Data field containing an array of samples along with convenience information in other fields.
+The data returned in a single chart sample depends on the asset type of the instrument. The following applies:
+
+| AssetType       | Close | CloseAsk/ CloseBid  | High   | HighAsk/ HighBid | Interest | Low | LowAsk/ LowBid  | Open | OpenAsk/ OpenBid   | Time | Volume |
+|-----------------|-------|---------------------|--------|------------------|----------|-----|-----------------|------|--------------------|------|--------|
+| CfdOnIndex      |       | x                   |        | x                |          |     | x               |      | x                  | x    |        |
+| CfdOnFutures    |       | x                   |        | x                |          |     | x               |      | x                  | x    |        |
+| FxSpot          |       | x                   |        | x                |          |     | x               |      | x                  | x    |        |
+| Stock           | x     |                     |        |                  | x        | x   |                 | x    |                    | x    | x      |
+| CfdOnStock      | x     |                     | x      |                  | x        | x   |                 | x    |                    | x    | x      |
+| ManagedFund     | x     |                     | x      |                  | x        | x   |                 | x    |                    | x    | x      |
+| StockIndex      | x     |                     | x      |                  | x        | x   |                 | x    |                    | x    | x      |
+| ContractFutures | x     |                     | x      |                  | x        | x   |                 | x    |                    | x    | x      |
+
+<InfoBlock>
+We are currently not able to provide chart data for the asset types shown in italics to 3rd party applications.
+</InfoBlock>
+
+### Finding the first available sample
+The ChartInfo group includes a `FirstSampleTime` field. This provides the time of the very first sample. 
+Having this information is often useful if you want to show a chart with a horizontal slider at the bottom, and you want to give that slider the correct 
+approximate length even if you do not want to initially fetch all of the chart samples.
+
+## Typical usage - Request/Response
+The most common usage of the chart endpoint in a request/response mode is as follows:
+
+1. First make a simple get request specifying `AssetType`, `Uic`, ` Horizon` and all field groups. This will return:
+    - `ChartInfo` holds various convenience information which applies for all samples on the specified instrument/horizon
+    - `DisplayAndFormat` holds information about how to format the prices in the samples.
+    - `Data` includes the most recent 100 samples up to current time.
+    - A `DataVersion` (see later)
+2. Then, at regular intervals make requests specifying 
+    - `AssetType`, 
+    - `Uic`, 
+    - `Horizon` and:
+    - `Mode=From`
+    - `Time`= the value of the most recent sample, which you have in your Data array.
+3. The Data array will now include "all" samples which exist from or after the specified time. Often this will just be a single sample.
+
+## Sample formation
+A new sample is inserted in the array at the time when the sample should start. This sample's data will then be updated until the sample is completed 
+and a new sample is started. You will thus typically see a newly created sample with volume=0 and open, high, low, close set to the same value. 
+Over time, you will see the high and low move away from the open value, while the close will move up and down reflecting the current price of the instrument.
+
+## About Chart sample prices and correct usage of chart prices
+While the close price of the most recent sample represents the most recent price for the specified instrument, you should not use this for display on a watchlist. 
+The chart feed is intended for display on charts. For the most accurate and up to date instrument prices, you should use the `/infoprices` or `/prices` endpoints in the Trade service group.
+
+You should also not expect the most recent sample's close price to be 100% in sync with prices streamed from the Trade service group, as the way the two datasets are sampled and distributed in slightly different ways.
+
+## Typical usage - Streaming
+Using chart streaming resembles the way described for request/response. When setting up the subscription, specify `AssetType`, `Uic`, `Horizon` and all field groups. 
+This will return a snapshot containing the same information as explained above. From then on, just respond to incoming updates over the streaming connection.
+
+#### Creating a streaming connection
+To screate a new streaming connection first create a POST request specifying the instrument, horizon and asset type:
+```
+POST https://gateway.saxobank.com/sim/openapi/chart/v1/charts/subscriptions
+Body:
+{
+	"Arguments": {
+		"AssetType": "FxSpot",
+		"Horizon": 1,
+		"Uic": 21
+	},
+	"ContextId": "explorer_1661426049833",
+	"ReferenceId": "Q_974"
+}
+```
+The response will then hold information on the newly created subscription:
+```
+{
+  "ContextId": "explorer_1661426049833",
+  "InactivityTimeout": 30,
+  "ReferenceId": "Q_974",
+  "RefreshRate": 300,
+  "Snapshot": {
+    "Data": [
+      {
+        "CloseAsk": 0.99815,
+        "CloseBid": 0.99795,
+        "HighAsk": 0.9985,
+        "HighBid": 0.9983,
+        "LowAsk": 0.99811,
+        "LowBid": 0.99791,
+        "OpenAsk": 0.99849,
+        "OpenBid": 0.99829,
+        "Time": "2022-08-24T15:04:00.000000Z"
+      },
+      ..
+      {
+        "CloseAsk": 0.99816,
+        "CloseBid": 0.99796,
+        "HighAsk": 0.99843,
+        "HighBid": 0.99823,
+        "LowAsk": 0.99812,
+        "LowBid": 0.99792,
+        "OpenAsk": 0.99816,
+        "OpenBid": 0.99796,
+        "Time": "2022-08-24T15:05:00.000000Z"
+      }
+    ],
+    "DataVersion": 1202043853
+  },
+  "State": "Active"
+}
+```
+While new streaming messages will include new updates to the snapshot:
+```
+[
+  [
+    {
+      "ReferenceId": "Q_974",
+      "Timestamp": "2022-08-25T11:17:46.075109Z",
+      "Data": [
+        {
+          "CloseAsk": 0.99877,
+          "CloseBid": 0.99857,
+          "HighAsk": 0.99896,
+          "HighBid": 0.99876,
+          "LowAsk": 0.99875,
+          "LowBid": 0.99855,
+          "OpenAsk": 0.99894,
+          "OpenBid": 0.99874,
+          "Time": "2022-08-25T11:17:00.000000Z"
+        }
+      ]
+    }
+  ],
+] 
+```
+## About Chart Corrections
+Historical chart data may change from time to time. For example, a 1:2 stock split will suddenly cut all historical prices as well as the current price in half.
+In a request/response scenario, you should be watching for the DataVersion field. If this is updated, you should invalidate and re-fetch all samples for this instrument / time horizon. In a streaming scenario you will receive a __reset subscriptions event.
